@@ -1,0 +1,6 @@
+@use 'colors.scss' as c;
+:host {
+  display: block;
+  background-color: c.$background-color;
+  min-height: 100%;
+}

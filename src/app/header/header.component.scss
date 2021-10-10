@@ -1,0 +1,16 @@
+@use 'app-vars.scss' as v;
+@use 'colors.scss' as c;
+:host {
+  display: block;
+  background-color: c.$primary-color;
+  color: c.$primary-contrast;
+  border-bottom: 1px solid c.$primary-color; // stop margin collapse
+}
+
+div {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: v.$max-width;
+  padding-top: v.$base*4;
+}
