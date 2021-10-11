@@ -21,6 +21,6 @@ export class LoremPicsumService {
   constructor(private readonly http: HttpClient) {}
 
   getPicsumPhotosList({ limit }: { limit: number }) {
-    return this.http.get<PicsumPhotos>(`${PICSUM_URL}/v2/list/limit=${limit}`);
+    return this.http.get<PicsumPhotos>(`${PICSUM_URL}/v2/list?limit=${limit}`);
   }
 }

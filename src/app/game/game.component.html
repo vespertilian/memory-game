@@ -1,1 +1,9 @@
-<p>game works!</p>
+<div>
+  <pre>{{gameService.gameDetails$ | async | json}}</pre>
+</div>
+
+<mat-grid-list cols="5" rowHeight="fit">
+  <mat-grid-tile *ngFor="let card  of gameService.cards$ | async;  trackBy: cardById" (click)="gameService.selectCard(card.id)">
+    <app-card [card]="card"></app-card>
+  </mat-grid-tile>
+</mat-grid-list>

@@ -1,0 +1,5 @@
+<ng-container *ngIf="card">
+  <img *ngIf="card.state === stateOptions.selected" [src]="card.primaryImageUrl">
+  <img *ngIf="card.state === stateOptions.matched" [src]="card.grayscaleImageUrl">
+  <p *ngIf="card.state === stateOptions.unselectedAndUnmatched">?</p>
+</ng-container>

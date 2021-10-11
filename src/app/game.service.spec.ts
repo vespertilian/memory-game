@@ -1,11 +1,12 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { Card, GameService, GameState } from './game.service';
+import { GameService} from './game.service';
 import { MockProvider } from 'ng-mocks';
 import { LoremPicsumService, PICSUM_URL, PicsumPhotos } from './lorem-picsum.service';
 import { Observable, of } from 'rxjs';
 import { asyncData, asyncError } from '../test-helpers/async-data-helpers';
 import { extractValues$ } from '../test-helpers/observable-test-helper';
 import { COMMON_STATUS } from './status';
+import { Card, GameState } from './game.models';
 
 interface SetupParams {
   getPicsumPhotosListResult: Observable<PicsumPhotos>
@@ -25,7 +26,7 @@ describe('GameService', () => {
   }
 
   describe('setup', () => {
-    it('loads, then creates the game state', fakeAsync(() => {
+    it('creates the game state when the data successfully loads', fakeAsync(() => {
       const {service} = setup({
         getPicsumPhotosListResult: asyncData(stubPicsumPhotosListStub)
       })
@@ -70,8 +71,8 @@ describe('GameService', () => {
         picsumId: jasmine.any(String),
         primaryImageUrl: `${PICSUM_URL}/id/${sampleCard.picsumId}/200/300`,
         grayscaleImageUrl: `${PICSUM_URL}/id/${sampleCard.picsumId}/200/300?grayscale&blur=2`,
-        matchedBy: null,
       } as any
+
       expect(sampleCard).toEqual(expectedCard)
 
       // should have a matching card
@@ -83,7 +84,7 @@ describe('GameService', () => {
       expect(matchingCard.picsumId).toEqual(expectedCard.picsumId)
     }))
 
-    it('loads, then sets a rejected status if we fail to fetch the cards', fakeAsync(() => {
+    it('sets a rejected status if we fail to fetch the cards', fakeAsync(() => {
       const {service} = setup({
         getPicsumPhotosListResult: asyncError(new Error('service down'))
       })
@@ -106,7 +107,7 @@ describe('GameService', () => {
     }))
   })
 
-  describe('selectCard', () => {
+  describe('.selectCard', () => {
     function setupSevenCardGame({players}: {players: 1 | 2}) {
       const {service} = setup({
         getPicsumPhotosListResult: of(stubPicsumPhotosListStub)
@@ -124,8 +125,8 @@ describe('GameService', () => {
       expect(gameState).toEqual(null)
     })
 
-    describe('no cards selected', () => {
-      it('adds the card to the selectedIds list', () => {
+    describe('when no card is selected', () => {
+      it('adds the card to the selectedIds map', () => {
         const {service} = setupSevenCardGame({players: 1})
         service.selectCard('1--1')
 
@@ -135,76 +136,164 @@ describe('GameService', () => {
       })
     })
 
-    describe('a card already selected', () => {
+    describe('when a card is already selected', () => {
       function setupSevenCardGameSelectFirstCard({players}: {players: 1 | 2}) {
         const {service} = setupSevenCardGame({players})
         service.selectCard('1--1')
         return {service}
       }
 
-      describe('selecting a non matching card single player', () => {
-        it('adds the second card to the selected list, then immediately clears the selected cards, leaving the player set to player 1', () => {
-          const {service} = setupSevenCardGameSelectFirstCard({players: 1})
+      it('does nothing when you select an already selected card', () => {
+        const {service} = setupSevenCardGameSelectFirstCard({players: 1})
+        let results: GameState[] = []
+        const gameStateChanges = service.gameState$.subscribe(
+          (v) => {
+            results.push(v as GameState)
+          },
+          fail
+        )
 
-          let results: GameState[] = []
-          const gameStateChanges = service.gameState$.subscribe(
-            (v) => {
-              results.push(v as GameState)
-            },
-            fail
-          )
+        service.selectCard('1--1')
+        // game state is a behaviour subject so will always emit last value
+        expect(results.length).toBe(1)
+      })
 
-          service.selectCard('2--1')
-          const [_, cardsSelected, cardsCleared] = results
+      it('does nothing when you select an already selected or matched card', () => {
+        const {service} = setupSevenCardGameSelectFirstCard({players: 1})
+        service.selectCard('1--2')
 
-          expect(cardsSelected.selectedIds.size).toEqual(2)
-          expect(cardsSelected.player1Matches.size).toEqual(0)
-          expect(cardsSelected.player2Matches.size).toEqual(0)
-          expect(cardsCleared.selectedIds.size).toEqual(0)
-          expect(cardsCleared.currentPlayer).toEqual(1)
+        let results: GameState[] = []
+        const gameStateChanges = service.gameState$.subscribe(
+          (v) => {
+            results.push(v as GameState)
+          },
+          fail
+        )
+
+        service.selectCard('1--1')
+        // game state is a behaviour subject so will always emit last value
+        expect(results.length).toBe(1)
+        // player already had this card matched
+        expect(results[0].player1Matches.size).toEqual(2)
+      })
+
+      describe('single player', () => {
+        describe('selecting a non matching card', () => {
+          it(`the second card is added to the selectedIds,
+                         then the selectedIds are reset after a short delay`, fakeAsync(() => {
+            const {service} = setupSevenCardGameSelectFirstCard({players: 1})
+
+            let results: GameState[] = []
+            const gameStateChanges = service.gameState$.subscribe(
+              (v) => {
+                results.push(v as GameState)
+              },
+              fail
+            )
+
+            service.selectCard('2--1')
+            const cardsSelected = results[1]
+
+            expect(cardsSelected.selectedIds.size).toEqual(2)
+            expect(cardsSelected.player1Matches.size).toEqual(0)
+            expect(cardsSelected.player2Matches.size).toEqual(0)
+            expect(service.timeoutId).toBeTruthy()
+
+            tick(2000)
+            const cardsCleared = results[2]
+            expect(cardsCleared.selectedIds.size).toEqual(0)
+            expect(cardsCleared.currentPlayer).toEqual(1)
+
+            gameStateChanges.unsubscribe();
+          }))
         })
 
-        it('adds the second card to the selected list, then immediately clears the selected cards, and changes the player to the other player', () => {
-          const {service} = setupSevenCardGameSelectFirstCard({players: 2})
+        describe('selecting a matching card', () => {
+          it(`adds both selected cards to the players "matches" set,
+                         resets the selectedIds`, fakeAsync(() => {
+            const {service} = setupSevenCardGameSelectFirstCard({players: 1})
 
-          let results: GameState[] = []
-          const gameStateChanges = service.gameState$.subscribe(
-            (v) => {
-              results.push(v as GameState)
-            },
-            fail
-          )
+            let results: GameState[] = []
+            const gameStateChanges = service.gameState$.subscribe(
+              (v) => {
+                results.push(v as GameState)
+              },
+              fail
+            )
 
-          service.selectCard('2--1')
-          const [_, cardsSelected, cardsCleared] = results
+            service.selectCard('1--2')
+            const cardsSelected = results[1]
+            expect(cardsSelected.selectedIds.size).toEqual(0)
+            expect(Array.from(cardsSelected.player1Matches).sort()).toEqual(['1--1', '1--2'])
+            expect(cardsSelected.player2Matches.size).toEqual(0)
+            expect(results.length).toEqual(2)
+            expect(service.timeoutId).toBe(null)
 
-          expect(cardsSelected.selectedIds.size).toEqual(2)
-          expect(cardsSelected.player1Matches.size).toEqual(0)
-          expect(cardsSelected.player2Matches.size).toEqual(0)
-          expect(cardsCleared.selectedIds.size).toEqual(0)
-          expect(cardsCleared.currentPlayer).toEqual(2)
+            gameStateChanges.unsubscribe();
+          }))
         })
       })
 
-      describe('selecting a matching card', () => {
-        it('adds the second card to the selected list, then immediately clears the selected cards, leaving the current player selected', () => {
-          const {service} = setupSevenCardGameSelectFirstCard({players: 1})
+      describe('two players', () => {
+        describe('selecting a non matching card', () => {
+          it(`
+            the second card is added to the selectedIds,
+            the player is switched
+            then the selectedIds are reset after a short delay`, fakeAsync(() => {
+            const {service} = setupSevenCardGameSelectFirstCard({players: 2})
 
-          let results: GameState[] = []
-          const gameStateChanges = service.gameState$.subscribe(
-            (v) => {
-              results.push(v as GameState)
-            },
-            fail
-          )
+            let results: GameState[] = []
+            const gameStateChanges = service.gameState$.subscribe(
+              (v) => {
+                results.push(v as GameState)
+              },
+              fail
+            )
 
-          service.selectCard('1--2')
-          const [_, cardsSelected, cardsCleared] = results
+            service.selectCard('2--1')
+            const cardsSelected = results[1]
 
-          expect(cardsSelected.selectedIds.size).toEqual(2)
-          expect(cardsSelected.player1Matches.size).toEqual(2)
-          expect(cardsSelected.player2Matches.size).toEqual(0)
-          expect(cardsCleared.selectedIds.size).toEqual(0)
+            expect(cardsSelected.selectedIds.size).toEqual(2)
+            expect(cardsSelected.player1Matches.size).toEqual(0)
+            expect(cardsSelected.player2Matches.size).toEqual(0)
+            expect(cardsSelected.currentPlayer).toEqual(1)
+            expect(service.timeoutId).toBeTruthy()
+
+            tick(2000)
+            const cardsCleared = results[2]
+            expect(cardsCleared.selectedIds.size).toEqual(0)
+            expect(cardsCleared.currentPlayer).toEqual(2)
+
+            gameStateChanges.unsubscribe();
+          }))
+        })
+
+        describe('selecting a matching card', () => {
+          it(`adds both selected cards to the players "matches" set,
+                         resets the selected list,
+                         keeps the current player selected`, fakeAsync(() => {
+            const {service} = setupSevenCardGameSelectFirstCard({players: 2})
+
+            let results: GameState[] = []
+            const gameStateChanges = service.gameState$.subscribe(
+              (v) => {
+                results.push(v as GameState)
+              },
+              fail
+            )
+            expect(results[0].currentPlayer).toBe(1)
+
+            service.selectCard('1--2')
+            const cardsSelected = results[1]
+            expect(cardsSelected.selectedIds.size).toEqual(0)
+            expect(Array.from(cardsSelected.player1Matches).sort()).toEqual(['1--1', '1--2'])
+            expect(cardsSelected.player2Matches.size).toEqual(0)
+            expect(cardsSelected.currentPlayer).toBe(1)
+            expect(results.length).toEqual(2)
+            expect(service.timeoutId).toBe(null)
+
+            gameStateChanges.unsubscribe();
+          }))
         })
       })
     })

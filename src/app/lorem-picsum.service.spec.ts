@@ -28,7 +28,7 @@ describe('LoremPicsumService', () => {
     const [result] = extractValues$({ obs$ });
 
     expect(http.get).toHaveBeenCalledWith(
-      `https://picsum.photos/v2/list/limit=1`
+      `https://picsum.photos/v2/list?limit=1`
     );
     expect(result).toEqual(resultStub);
   });
