@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "format": "prettier --write ."
   },
   "private": true,
   "dependencies": {
@@ -37,6 +38,7 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "~1.7.0",
     "ng-mocks": "^12.5.0",
+    "prettier": "^2.4.1",
     "typescript": "~4.3.5"
   }
 }
