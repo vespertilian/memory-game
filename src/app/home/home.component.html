@@ -1,1 +1,16 @@
-<p>home works!</p>
+<div>
+  <form [formGroup]="form">
+    <h1>1 Player</h1>
+    <mat-form-field appearance="fill">
+      <mat-label>Player 1 Name</mat-label>
+      <input matInput formControlName="player1Name">
+    </mat-form-field>
+    <button mat-stroked-button (click)="start1PlayerGame()" [disabled]="!form.valid">START 1 PLAYER GAME</button>
+    <h1>2 Players</h1>
+    <mat-form-field appearance="fill">
+      <mat-label>Player 2 Name</mat-label>
+      <input matInput formControlName="player2Name">
+    </mat-form-field>
+    <button mat-stroked-button (click)="start2PlayerGame()" [disabled]="twoPlayerDisabled(form)">START 2 PLAYER GAME</button>
+  </form>
+</div>

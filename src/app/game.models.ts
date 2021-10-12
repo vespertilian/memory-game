@@ -38,16 +38,18 @@ export interface GameState extends GameParams, CardData {
   player2Matches: MatchSet;
 }
 
-export enum GameStatus {
+export enum GAME_STATUS {
   inProgress = 'inProgress',
   finished = 'finished'
 }
 
 export interface GameDetails {
-  players: number,
+  twoPlayers: boolean,
+  currentPlayerName: string
   player1Name: string,
   player2Name: string
-  player1Score: string
-  player2Score: string
-  gameStatus: GameStatus
+  player1Score: number
+  player2Score: number
+  gameStatus: GAME_STATUS
+  finishedMessage: string
 }

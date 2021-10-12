@@ -1,5 +1,5 @@
 import { PICSUM_URL, PicsumPhoto, PicsumPhotos } from './lorem-picsum.service';
-import { Card, CardData, CardState, GameState, GameStatus, MatchSet } from './game.models';
+import { Card, CardData, CardState, GameState, GAME_STATUS, MatchSet } from './game.models';
 
 export function createCardsFromPicsumPhotos({ width, height, }: { width: number, height: number}) {
   return function createCardFromList(list: PicsumPhotos): CardData {
@@ -100,15 +100,45 @@ export function gameStateToDetails(state: GameState) {
   // we make the set odd by removing a card so we're finished
   // when the card size is two smaller than the total
   const finished = (state.cards.size - 2) === totalMatches
+  const player1Score = state.player1Matches.size / 2;
+  const player2Score = state.player2Matches.size / 2;
+  const player1Name = state.player1Name
+  const player2Name = state.player2Name || ''
 
   return {
-    players: state.players,
-    player1Name: state.player1Name,
-    player2Name: state.player2Name || '',
-    player1Score: state.player1Matches.size / 2,
-    player2Score: state.player2Matches.size / 2,
-    gameStatus: finished ? GameStatus.finished : GameStatus.inProgress
+    player1Name,
+    player2Name,
+    twoPlayers: state.players === 2,
+    currentPlayerName: getCurrentPlayerName(state),
+    player1Score,
+    player2Score,
+    gameStatus: finished ? GAME_STATUS.finished : GAME_STATUS.inProgress,
+    finishedMessage: winningPlayersName({
+      player1Name,
+      player1Score,
+      player2Name,
+      player2Score
+    })
   }
+}
+
+function winningPlayersName({player1Score, player2Score, player1Name, player2Name}: {
+  player1Score: number, player2Score: number, player1Name: string, player2Name: string
+}): string {
+  if (player1Score === player2Score) {
+    return `It's a draw!`
+  }
+  if (player1Score > player2Score) {
+    return `${player1Name} wins!`
+  }
+  return `${player2Name} wins!`
+}
+
+function getCurrentPlayerName(gameState: GameState): string {
+  if (gameState.currentPlayer === 2) {
+    return gameState.player2Name || ''
+  }
+  return gameState.player1Name
 }
 
 // players

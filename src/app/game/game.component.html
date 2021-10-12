@@ -1,9 +1,23 @@
-<div>
-  <pre>{{gameService.gameDetails$ | async | json}}</pre>
-</div>
-
-<mat-grid-list cols="5" rowHeight="fit">
-  <mat-grid-tile *ngFor="let card  of gameService.cards$ | async;  trackBy: cardById" (click)="gameService.selectCard(card.id)">
-    <app-card [card]="card"></app-card>
-  </mat-grid-tile>
-</mat-grid-list>
+<mat-progress-bar *ngIf="loading$ | async" mode="indeterminate"></mat-progress-bar>
+<p *ngIf="errorLoading$ | async" class="loading-error">Error loading cards. Please refresh your browser.</p>
+<ng-container *ngIf="gameService.gameDetails$ | async as gameDetails">
+    <div class="game-details">
+      <app-player-details [player]="1" [gameDetails]="gameDetails"></app-player-details>
+      <ng-container *ngIf="gameDetails.twoPlayers">
+        <p>VS</p>
+        <app-player-details [player]="2" [gameDetails]="gameDetails"></app-player-details>
+      </ng-container>
+    </div>
+    <div class="game-finished" *ngIf="gameDetails.gameStatus === gameStatus.finished">
+      <h1>{{gameDetails.finishedMessage}}</h1>
+      <button mat-stroked-button (click)="restartGame()">Restart game</button>
+    </div>
+    <div class="grid-container" *ngIf="gameDetails.gameStatus === gameStatus.inProgress">
+      <p *ngIf="gameDetails.twoPlayers">{{gameDetails.currentPlayerName}}'s turn<p>
+      <mat-grid-list cols="5" rowHeight="2:3">
+        <mat-grid-tile *ngFor="let card  of gameService.cards$ | async;  trackBy: cardById" (click)="gameService.selectCard(card.id)">
+          <app-card [card]="card"></app-card>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+</ng-container>

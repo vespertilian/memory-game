@@ -1,9 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { LoremPicsumService, } from './lorem-picsum.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { COMMON_STATUS } from './status';
 import { filter, map } from 'rxjs/operators';
-import { CardState, DisplayCard, GameParams, GameState } from './game.models';
+import { CardState, DisplayCard, GameDetails, GameParams, GameState } from './game.models';
 import {
   cardIdToDisplayCard,
   createCardsFromPicsumPhotos, gameStateToDetails,
@@ -31,10 +31,18 @@ export class GameService implements OnDestroy {
     map(gameStateToDisplayCards),
   )
 
-  gameDetails$ = this.gameState$.pipe(
+  _gameDetails$: Observable<GameDetails> = this.gameState$.pipe(
     filter(isGameState),
     map(gameStateToDetails)
   )
+
+  gameDetails$: Observable<null | GameDetails> = combineLatest( [this._gameDetails$, this.status$] )
+    .pipe(map(([gameDetails, status]) => {
+      if (status !== COMMON_STATUS.resolved) {
+        return null
+      }
+      return gameDetails
+    }))
 
   constructor(private readonly loremPicsumService: LoremPicsumService) {}
 

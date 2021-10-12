@@ -1,2 +1,7 @@
+@use '~@angular/material' as mat;
+
 $max-width: 900px;
 $base: 4px;
+
+// Use the default configuration.
+$typography: mat.define-typography-config();

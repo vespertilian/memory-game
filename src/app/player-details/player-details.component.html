@@ -1,0 +1,14 @@
+<ng-container *ngIf="player === 1">
+  <div>
+    <h4>Player</h4>
+    <h3>{{gameDetails?.player1Name}}</h3>
+  </div>
+  <p>{{gameDetails?.player1Score}}</p>
+</ng-container>
+<ng-container *ngIf="player === 2">
+  <div>
+    <h4>Player</h4>
+    <h3>{{gameDetails?.player2Name}}</h3>
+  </div>
+  <p>{{gameDetails?.player2Score}}</p>
+</ng-container>

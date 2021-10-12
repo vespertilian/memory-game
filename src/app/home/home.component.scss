@@ -1,0 +1,32 @@
+@use "app-vars.scss" as v;
+@use "colors.scss" as c;
+@use '~@angular/material' as mat;
+
+:host {
+  display: block;
+  max-width: v.$max-width;
+  margin-left: auto;
+  margin-right: auto ;
+  padding-bottom: v.$base * 6;
+  padding-right: v.$base * 3;
+  padding-left: v.$base * 3;
+}
+
+div {
+  background-color: whitesmoke;
+  padding: v.$base * 4;
+  border-radius: v.$base * 2;
+  margin-top: v.$base * 4;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  margin-top: v.$base * 4;
+}

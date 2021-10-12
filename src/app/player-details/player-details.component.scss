@@ -1,0 +1,36 @@
+@use "app-vars.scss" as v;
+@use "colors.scss" as c;
+@use '~@angular/material' as mat;
+
+:host {
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+  flex-basis: 0;
+  padding: v.$base * 4;
+  border-radius: v.$base * 4;
+  background-color: c.$primary-color;
+  color: c.$primary-contrast;
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+}
+
+h4 {
+  @include mat.typography-level(v.$typography, 'subheading-1');
+}
+h3 {
+  @include mat.typography-level(v.$typography, 'title');
+}
+
+p {
+  margin-left: v.$base * 2;
+  margin-right: v.$base * 2;
+  @include mat.typography-level(v.$typography, 'display-3');
+}
+
+h4, h3, p {
+  margin-bottom: 0;
+}

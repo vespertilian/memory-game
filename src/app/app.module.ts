@@ -10,6 +10,11 @@ import { CardComponent } from './card/card.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CommonModule } from '@angular/common';
+import { PlayerDetailsComponent } from './player-details/player-details.component';
+import { MatButtonModule } from '@angular/material/button';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -18,6 +23,7 @@ import { CommonModule } from '@angular/common';
     HeaderComponent,
     GameComponent,
     CardComponent,
+    PlayerDetailsComponent,
   ],
   imports: [
     BrowserModule,
@@ -25,7 +31,11 @@ import { CommonModule } from '@angular/common';
     AppRoutingModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    MatGridListModule
+    ReactiveFormsModule,
+    MatInputModule,
+    MatGridListModule,
+    MatButtonModule,
+    MatProgressBarModule
   ],
   providers: [
   ],
