@@ -20,7 +20,7 @@ describe('LoremPicsumService', () => {
     return { service, http };
   }
 
-  it('should be created', () => {
+  it('correctly calls the picsum endpoint and returns a list', () => {
     const resultStub = [{ id: '1' }] as any;
     const { service, http } = setup({ getResult: of(resultStub) });
 

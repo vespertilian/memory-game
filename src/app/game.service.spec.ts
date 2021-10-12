@@ -6,7 +6,8 @@ import { Observable, of } from 'rxjs';
 import { asyncData, asyncError } from '../test-helpers/async-data-helpers';
 import { extractValues$ } from '../test-helpers/observable-test-helper';
 import { COMMON_STATUS } from './status';
-import { Card, GameState } from './game.models';
+import { Card, GameDetails, GameState } from './game.models';
+import { Spied } from '../test-helpers/spied';
 
 interface SetupParams {
   getPicsumPhotosListResult: Observable<PicsumPhotos>
@@ -21,8 +22,9 @@ describe('GameService', () => {
         }),
       ],
     });
+    const loremPicsumService: Spied<LoremPicsumService> = TestBed.inject(LoremPicsumService) as any
     const service = TestBed.inject(GameService);
-    return { service };
+    return { service, loremPicsumService };
   }
 
   describe('setup', () => {
@@ -105,6 +107,62 @@ describe('GameService', () => {
       const [gameState] = extractValues$({obs$: service.gameState$})
       expect(gameState).toEqual(null)
     }))
+  })
+
+  describe('ngOnDestroy', () => {
+    it('clears any outstanding timeouts and calls the destroy subject', () => {
+      const {service} = setup({
+        getPicsumPhotosListResult: asyncData(stubPicsumPhotosListStub)
+      })
+
+      service.timeoutId = 124
+      let next: null | true = null;
+      let complete: null | true = null;
+
+      service.destroy$
+        .subscribe(
+          () => next = true,
+            fail,
+            () => complete = true
+        )
+      service.ngOnDestroy()
+
+
+      expect(next).toBeTrue()
+      expect(complete).toBeTrue()
+    })
+  })
+
+  describe('.gameDetails$', () => {
+    it('returns game details when the status is resolved', () => {
+      const {service} = setup({getPicsumPhotosListResult: of(stubPicsumPhotosListStub)})
+      service.setup({numberOfCards: 7, player1Name: 'Cameron', players: 1})
+
+      const [details] = extractValues$({obs$: service.gameDetails$})
+      const expectedDetails = {
+        currentPlayerName: 'Cameron',
+        finishedMessage: `It's a draw!`,
+        gameStatus: 'inProgress',
+        player1Name: 'Cameron',
+        player1Score: 0,
+        player2Name: '',
+        player2Score: 0,
+        twoPlayers: false
+      } as GameDetails
+      expect(details).toEqual(expectedDetails)
+    })
+
+    it('returns null when status is not resolved', () => {
+      const {service, loremPicsumService} = setup({getPicsumPhotosListResult: of(stubPicsumPhotosListStub)})
+      service.setup({numberOfCards: 7, player1Name: 'Cameron', players: 1})
+
+      loremPicsumService.getPicsumPhotosList.and.returnValue(asyncData(stubPicsumPhotosListStub))
+
+      // this just deals with resetting a game, otherwise the details service has no emitted any data
+      service.setup({numberOfCards: 7, player1Name: 'Cameron', players: 1})
+      const [details] = extractValues$({obs$: service.gameDetails$})
+      expect(details).toEqual(null)
+    })
   })
 
   describe('.selectCard', () => {

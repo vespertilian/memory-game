@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { LoremPicsumService, } from './lorem-picsum.service';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { COMMON_STATUS } from './status';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { CardState, DisplayCard, GameDetails, GameParams, GameState } from './game.models';
 import {
   cardIdToDisplayCard,
@@ -19,6 +19,7 @@ export const FLIP_BACK_IF_NOT_MATCHING_DURATION_MS = 1500
   providedIn: 'root',
 })
 export class GameService implements OnDestroy {
+  destroy$ = new Subject();
   timeoutId: number | null = null
 
   private _status$ = new BehaviorSubject(COMMON_STATUS.idle);
@@ -54,7 +55,8 @@ export class GameService implements OnDestroy {
       .getPicsumPhotosList({ limit })
       .pipe(
         map(createCardsFromPicsumPhotos({width: 200, height: 300})),
-        map(shuffleCardOrderMakeUneven)
+        map(shuffleCardOrderMakeUneven),
+        takeUntil(this.destroy$)
       )
       .subscribe(
         (cardData) => {
@@ -143,6 +145,8 @@ export class GameService implements OnDestroy {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId)
     }
+    this.destroy$.next()
+    this.destroy$.complete()
   }
 }
 
