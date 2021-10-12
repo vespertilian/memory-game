@@ -205,7 +205,7 @@ describe('GameComponent', () => {
   })
 
   describe('game finished', () => {
-    it('show the game finished div, clicking the restart game button calls setup with the save parameters', () => {
+    it('shows the game finished div, clicking the restart game button calls setup with the save parameters', () => {
       const cards: DisplayCard[] = [
         createMatchedDisplayCard(1),
         createMatchedDisplayCard(2),

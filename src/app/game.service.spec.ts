@@ -27,7 +27,7 @@ describe('GameService', () => {
     return { service, loremPicsumService };
   }
 
-  describe('setup', () => {
+  describe('.setup', () => {
     it('creates the game state when the data successfully loads', fakeAsync(() => {
       const {service} = setup({
         getPicsumPhotosListResult: asyncData(stubPicsumPhotosListStub)
@@ -109,7 +109,7 @@ describe('GameService', () => {
     }))
   })
 
-  describe('ngOnDestroy', () => {
+  describe('.ngOnDestroy', () => {
     it('clears any outstanding timeouts and calls the destroy subject', () => {
       const {service} = setup({
         getPicsumPhotosListResult: asyncData(stubPicsumPhotosListStub)
@@ -216,7 +216,7 @@ describe('GameService', () => {
         expect(results.length).toBe(1)
       })
 
-      it('does nothing when you select an already selected or matched card', () => {
+      it('does nothing when you select a matched card', () => {
         const {service} = setupSevenCardGameSelectFirstCard({players: 1})
         service.selectCard('1--2')
 
