@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HeaderComponent } from './header/header.component';
 import { GameComponent } from './game/game.component';
 import { CardComponent } from './card/card.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CommonModule } from '@angular/common';
 import { PlayerDetailsComponent } from './player-details/player-details.component';
@@ -16,29 +16,23 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
 import { MatLegacyProgressBarModule as MatProgressBarModule } from '@angular/material/legacy-progress-bar';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    HeaderComponent,
-    GameComponent,
-    CardComponent,
-    PlayerDetailsComponent,
-  ],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatGridListModule,
-    MatButtonModule,
-    MatProgressBarModule
-  ],
-  providers: [
-  ],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        HomeComponent,
+        HeaderComponent,
+        GameComponent,
+        CardComponent,
+        PlayerDetailsComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        CommonModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatGridListModule,
+        MatButtonModule,
+        MatProgressBarModule], providers: [
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule {}
