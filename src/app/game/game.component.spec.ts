@@ -10,7 +10,7 @@ import { getElBySelector, getElsBySelector, getInstancesBySelector } from '../..
 import { PlayerDetailsComponent } from '../player-details/player-details.component';
 import { CardComponent } from '../card/card.component';
 import { MatGridList, MatGridTile } from '@angular/material/grid-list';
-import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatLegacyProgressBar as MatProgressBar } from '@angular/material/legacy-progress-bar';
 
 const player1Name = 'Cameron'
 const player2Name = 'Nina'
