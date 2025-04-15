@@ -1,6 +1,6 @@
 @use "app-vars.scss" as v;
 @use "colors.scss" as c;
-@use '~@angular/material' as mat;
+@use '@angular/material' as mat;
 
 :host {
   display: flex;
